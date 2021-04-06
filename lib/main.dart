@@ -19,6 +19,7 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   int currentIndex = 0;
+
   final List<Widget> children = [HomeScreen(), WalletScreen(), ProfileScreen()];
 
   void onTabTapped(int index) {

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
@@ -9,28 +10,41 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  int selected = 50;
+  double selected = 50;
   bool other = false;
-  var listData = [];
-  var chartData = [];
+  bool isLoading = true;
+  List<FlSpot> chartData = [];
+  List<double> listData = [];
   TextEditingController controller;
-  final String price = "58 542";
+  String price = '';
+  double priceDouble = 1;
 
   void getData() async {
     var response = await http.get(
         Uri.parse('https://api.coindesk.com/v1/bpi/historical/close.json'));
-    jsonDecode(response.body)['bpi']
-        .forEach((key, value) => listData.add(value));
+    var priceData = await http
+        .get(Uri.parse('https://api.coindesk.com/v1/bpi/currentprice.json'));
+    Map priceJson = jsonDecode(priceData.body);
+    String result = priceJson['bpi']['USD']['rate'];
+    Map data = jsonDecode(response.body);
+    data['bpi'].forEach((key, value) => listData.add(value));
     for (int i = 0; i < listData.length; i++) {
-      chartData.add(FlSpot(i.toDouble(), listData[i].toDouble()));
+      chartData.add(FlSpot(i.toDouble(), listData[i]));
     }
+    setState(() {
+      price = result.substring(0, result.length - 5);
+      priceDouble = double.parse(price.replaceAll(',', ''));
+    });
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController();
     getData();
+    controller = TextEditingController();
   }
 
   @override
@@ -39,7 +53,7 @@ class HomeScreenState extends State<HomeScreen> {
     controller.dispose();
   }
 
-  void onTapped(int amount) {
+  void onTapped(double amount) {
     setState(() {
       selected = amount;
       other = false;
@@ -49,7 +63,7 @@ class HomeScreenState extends State<HomeScreen> {
   void onSubmit(String value) {
     setState(() {
       other = false;
-      selected = int.parse(value);
+      selected = double.parse(value.replaceAll(',', '.'));
     });
   }
 
@@ -78,16 +92,55 @@ class HomeScreenState extends State<HomeScreen> {
                     fontSize: 25.0)),
             SizedBox(height: 15),
             Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: LineChart(LineChartData(lineBarsData: [
-                      LineChartBarData(
-                          isCurved: true,
-                          show: true,
-                          spots: chartData.length > 0 ? chartData : [FlSpot(1, 1)])
-                    ])))),
+                padding: EdgeInsets.fromLTRB(15, 0, 15, 0),
+                child: isLoading
+                    ? Container(
+                        child: CupertinoActivityIndicator(
+                            radius: 20, animating: true))
+                    : Container(
+                        height: 200,
+                        padding: EdgeInsets.fromLTRB(5, 1, 1, 0),
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.amber,
+                              Colors.amber[700],
+                              Colors.amber[800],
+                              Colors.amber[900]
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        width: double.infinity,
+                        child: LineChart(LineChartData(
+                            lineTouchData: LineTouchData(
+                                touchTooltipData: LineTouchTooltipData(
+                              tooltipBgColor: const Color(0x00000000),
+                            )),
+                            borderData: FlBorderData(
+                              show: false,
+                              border: Border.all(),
+                            ),
+                            gridData: FlGridData(
+                              show: false,
+                            ),
+                            titlesData: FlTitlesData(
+                              show: false,
+                            ),
+                            lineBarsData: [
+                              LineChartBarData(
+                                dotData: FlDotData(show: false),
+                                colors: [
+                                  Colors.white,
+                                ],
+                                isCurved: true,
+                                barWidth: 1,
+                                spots: chartData,
+                              )
+                            ])))),
             Center(
                 child: Card(
                     margin: EdgeInsets.all(10.0),
@@ -110,12 +163,12 @@ class HomeScreenState extends State<HomeScreen> {
                                         style:
                                             TextStyle(color: Colors.blue[800])),
                                     onPressed: () {
-                                      onTapped(50);
+                                      onTapped(50.0);
                                     },
                                     style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all<Color>(
-                                                selected == 50
+                                                selected == 50.0
                                                     ? Colors.blue[100]
                                                     : Colors.white),
                                         shape: MaterialStateProperty.all(
@@ -130,12 +183,12 @@ class HomeScreenState extends State<HomeScreen> {
                                         style:
                                             TextStyle(color: Colors.blue[800])),
                                     onPressed: () {
-                                      onTapped(100);
+                                      onTapped(100.0);
                                     },
                                     style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all<Color>(
-                                                selected == 100
+                                                selected == 100.0
                                                     ? Colors.blue[100]
                                                     : Colors.white),
                                         shape: MaterialStateProperty.all(
@@ -150,12 +203,12 @@ class HomeScreenState extends State<HomeScreen> {
                                         style:
                                             TextStyle(color: Colors.blue[800])),
                                     onPressed: () {
-                                      onTapped(200);
+                                      onTapped(200.0);
                                     },
                                     style: ButtonStyle(
                                         backgroundColor:
                                             MaterialStateProperty.all<Color>(
-                                                selected == 200
+                                                selected == 200.0
                                                     ? Colors.blue[100]
                                                     : Colors.white),
                                         shape: MaterialStateProperty.all(
@@ -183,6 +236,21 @@ class HomeScreenState extends State<HomeScreen> {
                                             ))))),
                             other
                                 ? TextField(
+                                    keyboardType:
+                                        TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                    decoration: InputDecoration(
+                                      contentPadding:
+                                          EdgeInsets.fromLTRB(15, 0, 0, 0),
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Enter new amount',
+                                      hintStyle: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
                                     controller: controller,
                                     onSubmitted: (String value) {
                                       onSubmit(value);
@@ -193,7 +261,8 @@ class HomeScreenState extends State<HomeScreen> {
                                         color: Colors.grey,
                                         borderRadius: BorderRadius.circular(5)),
                                     padding: EdgeInsets.all(5.0),
-                                    child: Text('BTC ${selected * 0.000017}',
+                                    child: Text(
+                                        'BTC ${selected * 1 / priceDouble}',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Colors.indigo[900],

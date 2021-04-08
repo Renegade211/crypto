@@ -1,15 +1,30 @@
+import 'package:cryptoapp/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:cryptoapp/bloc.dart';
+import 'package:cryptoapp/events.dart';
+import 'package:cryptoapp/states.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: BlocProvider(
+            create: (context) => ChartBloc(chartRepo: ChartServices()),
+            child: HomeScreenBloc()));
+  }
+}
+
+class HomeScreenBloc extends StatefulWidget {
   @override
   HomeScreenState createState() => HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreenBloc> {
   double selected = 50;
   bool other = false;
   bool isLoading = true;
@@ -43,8 +58,12 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    getData();
+    loadData();
     controller = TextEditingController();
+  }
+
+  loadData() async {
+    context.bloc<ChartBloc>().add(ChartEvents.getData);
   }
 
   @override
@@ -85,11 +104,19 @@ class HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 20),
             Text('Bitcoin Price', style: TextStyle(color: Colors.white)),
             SizedBox(height: 5),
-            Text("USD $price",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25.0)),
+            BlocBuilder<ChartBloc, ChartState>(
+                builder: (BuildContext context, ChartState state) {
+              if (state is ChartLoading) {
+                return CupertinoActivityIndicator(radius: 20, animating: true);
+              }
+              if (state is ChartLoaded) {
+                return Text("$price USD",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0));
+              }
+            }),
             SizedBox(height: 15),
             Container(
                 padding: EdgeInsets.fromLTRB(15, 0, 15, 0),

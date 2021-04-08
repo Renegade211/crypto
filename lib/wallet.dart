@@ -83,7 +83,7 @@ class WalletScreen extends StatelessWidget {
                         height: 50,
                         width: 50,
                         image: NetworkImage(
-                            'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/1024/Ethereum-ETH-icon.png')),
+                            'https://cdn4.iconfinder.com/data/icons/logos-brands-5/24/ethereum-512.png')),
                     SizedBox(width: 5),
                     Expanded(
                       flex: 1,

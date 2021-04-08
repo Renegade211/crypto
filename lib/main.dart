@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cryptoapp/home.dart';
 import 'package:cryptoapp/wallet.dart';
 import 'package:cryptoapp/profile.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() => runApp(App());
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'CryptoApp', home: Home());
+    return MaterialApp(
+        title: 'CryptoApp', debugShowCheckedModeBanner: false, home: Home());
   }
 }
 

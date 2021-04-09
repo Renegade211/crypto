@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cryptoapp/home.dart';
-import 'package:cryptoapp/wallet.dart';
-import 'package:cryptoapp/profile.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cryptoapp/screens/home.dart';
+import 'package:cryptoapp/screens/wallet.dart';
+import 'package:cryptoapp/screens/profile.dart';
 
 void main() => runApp(App());
 

@@ -1,1 +1,0 @@
-enum ChartEvents { getData }
